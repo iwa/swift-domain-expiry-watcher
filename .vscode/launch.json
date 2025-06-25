@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:domain-expiry-watcher}",
+            "name": "Debug domain-expiry-watcher",
+            "program": "${workspaceFolder:domain-expiry-watcher}/.build/debug/domain-expiry-watcher",
+            "preLaunchTask": "swift: Build Debug domain-expiry-watcher"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:domain-expiry-watcher}",
+            "name": "Release domain-expiry-watcher",
+            "program": "${workspaceFolder:domain-expiry-watcher}/.build/release/domain-expiry-watcher",
+            "preLaunchTask": "swift: Build Release domain-expiry-watcher"
+        }
+    ]
+}

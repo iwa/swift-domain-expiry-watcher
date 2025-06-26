@@ -28,7 +28,7 @@ func main() async throws {
     await updateDomains()
 
     // Vapor
-    try app.cron.schedule(ComplexJob.self)
+    try app.cron.schedule(UpdateDomainsJob.self)
     try await app.execute()
 }
 

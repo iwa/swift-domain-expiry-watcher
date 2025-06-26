@@ -1,7 +1,7 @@
 import Vapor
 import VaporCron
 
-struct ComplexJob: VaporCronSchedulable {
+struct UpdateDomainsJob: VaporCronSchedulable {
     static var expression: String { "* * * * 0" } // hourly
 
     static func task(on application: Application) -> EventLoopFuture<Void> {

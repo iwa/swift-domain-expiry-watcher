@@ -38,8 +38,16 @@ func updateDomains() async {
             let expiryDate = try await WhoisUtils.getExpiryDate(domain: domain.domain)
             if expiryDate != "?" {
                 print("[INFO] Domain: \(domain.domain), Expiry Date: \(expiryDate)")
-                if let date = ISO8601DateFormatter().date(from: expiryDate) {
+
+                let date = try? Date.ISO8601FormatStyle(includingFractionalSeconds: false).parse(expiryDate)
+                let dateFracSeconds = try? Date.ISO8601FormatStyle(includingFractionalSeconds: true).parse(expiryDate)
+
+                if let date = date {
                     domain.expiryDate = date
+                    print("[INFO]     \(date.formatted(.dateTime.year(.twoDigits).month(.twoDigits).day(.twoDigits)))")
+                } else if let dateFracSeconds = dateFracSeconds {
+                    domain.expiryDate = dateFracSeconds
+                    print("[INFO]     \(dateFracSeconds.formatted(.dateTime.year(.twoDigits).month(.twoDigits).day(.twoDigits)))")
                 } else {
                     print("Invalid date format for domain: \(domain.domain)")
                 }

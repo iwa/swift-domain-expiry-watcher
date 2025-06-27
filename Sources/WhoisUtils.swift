@@ -4,6 +4,7 @@ import Network
 struct WhoisUtils {
     public static func getExpiryDate(domain: String) async throws -> String {
         do {
+            print("[INFO]   Looking for \(domain)...")
             let ianaResult = try await WhoisUtils.lookup(
                 domain: domain, host: "whois.iana.org")
 
@@ -12,7 +13,7 @@ struct WhoisUtils {
 
                 if let originMatch = ianaResult.firstMatch(of: originPattern) {
                     let originWhoisUrl = originMatch.1.trimmingCharacters(in: .whitespacesAndNewlines)
-                    print("[\(domain)]   Origin WHOIS URL: \(originWhoisUrl)")
+                    print("[INFO]   Origin WHOIS URL: \(originWhoisUrl)")
 
                     let whoisResult = try await WhoisUtils.lookup(domain: domain, host: originWhoisUrl)
 
@@ -22,20 +23,20 @@ struct WhoisUtils {
 
                         if let expiryDateMatch = whoisResult.firstMatch(of: expiryPattern) {
                             let expiryDate = expiryDateMatch.1.trimmingCharacters(in: .whitespacesAndNewlines)
-                            print("[\(domain)]   Expiry Date: \(expiryDate)")
+                            print("[INFO]   Expiry Date: \(expiryDate)")
                             return expiryDate
                         }
                     } else {
-                        print("[\(domain)]   No WHOIS result found")
+                        print("[WARN]   No WHOIS result found")
                     }
                 } else {
-                    print("[\(domain)]   No origin WHOIS URL found in IANA result")
+                    print("[WARN]   No origin WHOIS URL found in IANA result")
                 }
             } else {
-                print("[\(domain)]   No response received")
+                print("[WARN]   No response received")
             }
         } catch {
-            print("[\(domain)]   Error: \(error.localizedDescription)")
+            print("[ERROR]   Error: \(error.localizedDescription)")
         }
         return "?"
     }

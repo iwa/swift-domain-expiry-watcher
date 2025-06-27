@@ -6,7 +6,7 @@ struct UpdateDomainsJob: VaporCronSchedulable {
 
     static func task(on application: Application) -> EventLoopFuture<Void> {
         return application.eventLoopGroup.future().always { _ in
-            print("ComplexJob fired")
+            print("[INFO] UpdateDomainsJob fired, updating domains...")
             Task {
                 await updateDomains()
             }

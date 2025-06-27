@@ -11,7 +11,7 @@ func main() async throws {
     let envDomains = ProcessInfo.processInfo.environment["DOMAINS"]?.split(separator: ",").map(String.init) ?? []
 
     guard !envDomains.isEmpty else {
-        print("No domains provided. Set the DOMAINS environment variable as comma-separated values.")
+        print("[ERROR] No domains provided. Set the DOMAINS environment variable as comma-separated values.")
         return
     }
 
@@ -33,6 +33,8 @@ func main() async throws {
 }
 
 func updateDomains() async {
+    print("[INFO] Updating domains...")
+
     for var domain in await domains {
         do {
             let expiryDate = try await WhoisUtils.getExpiryDate(domain: domain.domain)
@@ -44,18 +46,16 @@ func updateDomains() async {
 
                 if let date = date {
                     domain.expiryDate = date
-                    print("[INFO]     \(date.formatted(.dateTime.year(.twoDigits).month(.twoDigits).day(.twoDigits)))")
                 } else if let dateFracSeconds = dateFracSeconds {
                     domain.expiryDate = dateFracSeconds
-                    print("[INFO]     \(dateFracSeconds.formatted(.dateTime.year(.twoDigits).month(.twoDigits).day(.twoDigits)))")
                 } else {
-                    print("Invalid date format for domain: \(domain.domain)")
+                    print("[WARN] Invalid date format for domain: \(domain.domain)")
                 }
             } else {
-                print("Failed to retrieve expiry date for domain: \(domain.domain)")
+                print("[WARN] Failed to retrieve expiry date for domain: \(domain.domain)")
             }
         } catch {
-            print("Error retrieving expiry date for domain \(domain.domain): \(error)")
+            print("[ERROR] Error retrieving expiry date for domain \(domain.domain): \(error)")
         }
     }
 }

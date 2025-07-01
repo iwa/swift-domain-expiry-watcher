@@ -1,4 +1,4 @@
-# swift domain expiry watcher
+# Swift Domain Expiry Watcher
 
 Console application which checks domain name date expiry, with notification support.
 

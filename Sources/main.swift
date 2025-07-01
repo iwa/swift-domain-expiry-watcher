@@ -4,10 +4,11 @@ import Network
 import Vapor
 
 let app = try await Application.make(.detect())
-var domains: [DomainWatched] = []
 
 @MainActor
 func main() async throws {
+    let appState = AppState.shared
+
     let envDomains = ProcessInfo.processInfo.environment["DOMAINS"]?.split(separator: ",").map(String.init) ?? []
 
     guard !envDomains.isEmpty else {
@@ -22,7 +23,7 @@ func main() async throws {
         }
 
         let domainName = domain.trimmingCharacters(in: .whitespacesAndNewlines)
-        domains.append(DomainWatched(domain: domainName, expiryDate: nil))
+        appState.domains[domainName] = DomainWatched(domain: domainName, expiryDate: nil)
     }
 
     await updateDomains()
@@ -32,10 +33,12 @@ func main() async throws {
     try await app.execute()
 }
 
+@MainActor
 func updateDomains() async {
     print("[INFO] Updating domains...")
+    let appState = AppState.shared
 
-    for var domain in await domains {
+    for var domain in appState.domains.values {
         do {
             let expiryDate = try await WhoisUtils.getExpiryDate(domain: domain.domain)
             if expiryDate != "?" {
@@ -46,8 +49,10 @@ func updateDomains() async {
 
                 if let date = date {
                     domain.expiryDate = date
+                    appState.domains[domain.domain] = domain
                 } else if let dateFracSeconds = dateFracSeconds {
                     domain.expiryDate = dateFracSeconds
+                    appState.domains[domain.domain] = domain
                 } else {
                     print("[WARN] Invalid date format for domain: \(domain.domain)")
                 }

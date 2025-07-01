@@ -10,7 +10,8 @@ let package = Package(
         .macOS(.v13), // Minimum macOS version
     ],
     dependencies: [
-        .package(url: "https://github.com/mihaelisaev/VaporCron.git", from: "2.6.0")
+        .package(url: "https://github.com/mihaelisaev/VaporCron.git", from: "2.6.0"),
+        .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.26.1")
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -18,7 +19,8 @@ let package = Package(
         .executableTarget(
             name: "domain-expiry-watcher",
             dependencies: [
-                .product(name: "VaporCron", package: "VaporCron")
+                .product(name: "VaporCron", package: "VaporCron"),
+                .product(name: "AsyncHTTPClient", package: "async-http-client"),
             ])
     ]
 )

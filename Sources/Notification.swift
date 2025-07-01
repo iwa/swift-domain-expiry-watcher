@@ -1,6 +1,7 @@
 import AsyncHTTPClient
 import Foundation
 
+@MainActor
 struct Notification {
     enum AlertType {
         case sevenDays, fourteenDays, thirtyDays
@@ -59,19 +60,10 @@ struct Notification {
 
     func sendTelegramNotification(domain: DomainWatched, alertType: AlertType) async throws {
         print("[INFO] Notification: triggered Telegram")
-
-        guard let telegramChatId = ProcessInfo.processInfo.environment["TELEGRAM_CHAT_ID"] else {
-            print("TELEGRAM_CHAT_ID environment variable not set")
-            return
-        }
-
-        guard let telegramBotToken = ProcessInfo.processInfo.environment["TELEGRAM_BOT_TOKEN"] else {
-            print("TELEGRAM_BOT_TOKEN environment variable not set")
-            return
-        }
+        let appState = AppState.shared
 
         let payload = TelegramMessage(
-            chatId: telegramChatId,
+            chatId: appState.telegramChatId,
             text: "<b>⚠️ Domain \(domain.domain) expires in \(alertType) days!</b>",
             parseMode: "HTML",
             disableNotification: true,
@@ -81,7 +73,7 @@ struct Notification {
         let jsonData = try JSONEncoder().encode(payload)
 
         var request = HTTPClientRequest(
-            url: "https://api.telegram.org/bot\(telegramBotToken)/sendMessage")
+            url: "https://api.telegram.org/bot\(appState.telegramBotToken)/sendMessage")
         request.method = .POST
         request.headers.add(name: "Content-Type", value: "application/json")
         request.body = .bytes(jsonData)

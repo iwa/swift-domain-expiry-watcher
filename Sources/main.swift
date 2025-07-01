@@ -10,6 +10,7 @@ func main() async throws {
     let appState = AppState.shared
 
     let envDomains = ProcessInfo.processInfo.environment["DOMAINS"]?.split(separator: ",").map(String.init) ?? []
+    let envTelegramNotification = ProcessInfo.processInfo.environment["TELEGRAM_NOTIFICATION"]?.lowercased() ?? "false"
 
     guard !envDomains.isEmpty else {
         print("[ERROR] No domains provided. Set the DOMAINS environment variable as comma-separated values.")
@@ -26,7 +27,34 @@ func main() async throws {
         appState.domains[domainName] = DomainWatched(domain: domainName, expiryDate: nil)
     }
 
+    if envTelegramNotification == "true" {
+        guard let telegramChatId = ProcessInfo.processInfo.environment["TELEGRAM_CHAT_ID"] else {
+            print("[ERROR] Telegram notification enabled but TELEGRAM_CHAT_ID environment variable not set")
+            return
+        }
+
+        guard let telegramBotToken = ProcessInfo.processInfo.environment["TELEGRAM_BOT_TOKEN"] else {
+            print("[ERROR] Telegram notification enabled but TELEGRAM_BOT_TOKEN environment variable not set")
+            return
+        }
+
+        appState.telegramChatId = telegramChatId
+        appState.telegramBotToken = telegramBotToken
+        appState.telegramNotification = true
+
+        print("[INFO] Telegram notifications are enabled.")
+    } else {
+        appState.telegramNotification = false
+        print("[INFO] Telegram notifications are disabled.")
+    }
+
+    // Initial domain update with notification trigger
+    print("[INFO] Starting domain expiry watcher...")
     await updateDomains()
+
+    for domain in appState.domains.values {
+        Notification().checkForNotification(domain: domain)
+    }
 
     // Vapor
     try app.cron.schedule(UpdateDomainsJob.self)
